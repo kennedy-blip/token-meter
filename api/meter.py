@@ -40,6 +40,12 @@ class handler(BaseHTTPRequestHandler):
             completion=max(0,min(1000000,int(d.get("completionEstimate",500))))
             model_id=str(d.get("modelId","balanced-fast"))
             model=MODELS.get(model_id) or CUSTOM.get(model_id)
+            if not model and isinstance(d.get("modelPricing"),dict):
+                candidate=d["modelPricing"]
+                rate_in=float(candidate.get("inputPer1M",0)); rate_out=float(candidate.get("outputPer1M",0)); context_size=int(candidate.get("context",0))
+                if rate_in<0 or rate_out<0 or max(rate_in,rate_out)>100000 or context_size<1000 or context_size>10000000:
+                    raise ValueError("Invalid custom model pricing.")
+                model={"name":str(candidate.get("name",model_id))[:100],"inputPer1M":rate_in,"outputPer1M":rate_out,"context":context_size}
             if not model: raise ValueError("Unknown model. Refresh the pricing catalog.")
             system_tokens=estimate_tokens(sys); history_tokens=sum(estimate_tokens(x) for x in history)
             prompt_tokens=estimate_tokens(prompt); input_tokens=system_tokens+history_tokens+prompt_tokens
