@@ -38,7 +38,7 @@ function renderLogs(){
 }
 function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderBudget(){ $("budget-top").textContent=usd(state.budget,2); }
-function collect(){return {systemPrompt:$("system").value,historyTurns:$("history").value.split(/\n+/).map(x=>x.trim()).filter(Boolean),userPrompt:$("prompt").value,completionEstimate:Number($("completion").value)||0,modelId:$("model").value,tenantId:$("tenant").value,workflowName:$("workflow").value,dailyRequests:Math.max(1,Number($("daily").value)||1),monthlyBudgetUsd:state.budget};}
+function collect(){const selected=state.models.find(m=>m.id===$("model").value);return {modelPricing:selected?{name:selected.name,inputPer1M:selected.inputPer1M,outputPer1M:selected.outputPer1M,context:selected.context}:null,systemPrompt:$("system").value,historyTurns:$("history").value.split(/\n+/).map(x=>x.trim()).filter(Boolean),userPrompt:$("prompt").value,completionEstimate:Number($("completion").value)||0,modelId:$("model").value,tenantId:$("tenant").value,workflowName:$("workflow").value,dailyRequests:Math.max(1,Number($("daily").value)||1),monthlyBudgetUsd:state.budget};}
 function renderResult(r){
  state.last=r;$("results").classList.remove("hidden");
  $("total-tokens").textContent=fmt(r.tokens.total);$("token-sub").textContent=fmt(r.tokens.input)+" input · "+fmt(r.tokens.completion)+" output";
